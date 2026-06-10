@@ -114,4 +114,6 @@ async function guidanceHandler(req, res, next) {
   }
 }
 
+app.post("/api/guidance", guidanceHandler);
+
 module.exports = app;
