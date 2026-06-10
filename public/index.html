@@ -195,6 +195,21 @@
       const message = document.querySelector("#message");
       const invitation = document.querySelector("#invitation");
       const prayer = document.querySelector("#prayer");
+
+      async function postJson(url, body) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Something went wrong. Please try again.");
+        }
+
+        return payload;
+      }
     </script>
   </body>
 </html>
