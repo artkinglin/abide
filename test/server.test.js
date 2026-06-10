@@ -75,6 +75,20 @@ test("guidance returns validated structured content", async () => {
   assert.match(payload.message, /honestly/);
 });
 
+test("guidance preserves actionable upstream errors", async () => {
+  global.fetch = async () => Response.json(
+    { error: "The API account has no credits." },
+    { status: 403 }
+  );
+
+  const { response, payload } = await post("/api/guidance", {
+    struggle: "I feel discouraged."
+  });
+
+  assert.equal(response.status, 502);
+  assert.equal(payload.error, "The API account has no credits.");
+});
+
 test("verse returns clean canonical scripture", async () => {
   global.fetch = async (url, options) => {
     assert.match(url, /^https:\/\/api\.esv\.org\/v3\/passage\/text\/\?/);
