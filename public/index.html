@@ -75,6 +75,33 @@
         border-color: #506b58;
         outline: 3px solid #dfe9e1;
       }
+
+      button {
+        justify-self: start;
+        min-width: 7rem;
+        border: 0;
+        border-radius: 999px;
+        padding: 0.8rem 1.5rem;
+        color: #fff;
+        background: #314d39;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #253d2c;
+      }
+
+      button:focus-visible {
+        outline: 3px solid #aec4b3;
+        outline-offset: 3px;
+      }
+
+      button:disabled {
+        cursor: wait;
+        opacity: 0.65;
+      }
     </style>
   </head>
   <body>
