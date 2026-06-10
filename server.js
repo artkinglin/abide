@@ -79,6 +79,13 @@ async function guidanceHandler(req, res, next) {
         ]
       })
     });
+    const payload = await readUpstreamJson(response, "Guidance");
+    const content = payload?.choices?.[0]?.message?.content;
+    if (!content) {
+      const error = new Error("Guidance response was empty.");
+      error.status = 502;
+      throw error;
+    }
   } catch (error) {
     next(error);
   }
