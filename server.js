@@ -21,4 +21,8 @@ Choose one relevant Bible passage reference. Do not diagnose mental illness, cla
 app.use(express.json({ limit: "16kb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
+function cleanString(value, maxLength) {
+  return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
 module.exports = app;
