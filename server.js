@@ -63,6 +63,14 @@ async function guidanceHandler(req, res, next) {
     if (!struggle) {
       return res.status(400).json({ error: "Please share what is on your heart." });
     }
+
+    const response = await fetchWithTimeout(XAI_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${requireApiKey("GROK_API_KEY")}`,
+        "Content-Type": "application/json"
+      }
+    });
   } catch (error) {
     next(error);
   }
