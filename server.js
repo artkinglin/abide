@@ -57,4 +57,15 @@ async function readUpstreamJson(response, serviceName) {
   return payload;
 }
 
+async function guidanceHandler(req, res, next) {
+  try {
+    const struggle = cleanString(req.body?.struggle, 4000);
+    if (!struggle) {
+      return res.status(400).json({ error: "Please share what is on your heart." });
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = app;
