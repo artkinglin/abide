@@ -46,4 +46,15 @@ async function fetchWithTimeout(url, options, timeoutMs = 20000) {
   }
 }
 
+async function readUpstreamJson(response, serviceName) {
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    const detail = payload?.error?.message || payload?.detail;
+    const error = new Error(detail || `${serviceName} request failed.`);
+    error.status = 502;
+    throw error;
+  }
+  return payload;
+}
+
 module.exports = app;
