@@ -231,6 +231,20 @@
         responsePanel.hidden = false;
         responsePanel.scrollIntoView({ behavior: "smooth", block: "start" });
       }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const struggle = textarea.value.trim();
+        if (!struggle) {
+          showStatus("Please share what is on your heart.", true);
+          textarea.focus();
+          return;
+        }
+
+        setLoading(true);
+        showStatus("Taking a quiet moment...");
+        responsePanel.hidden = true;
+      });
     </script>
   </body>
 </html>
