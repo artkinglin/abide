@@ -122,6 +122,14 @@ async function verseHandler(req, res, next) {
     if (!reference) {
       return res.status(400).json({ error: "A verse reference is required." });
     }
+
+    const params = new URLSearchParams({
+      q: reference,
+      "include-passage-references": "false",
+      "include-verse-numbers": "false",
+      "include-footnotes": "false",
+      "include-headings": "false"
+    });
   } catch (error) {
     next(error);
   }
