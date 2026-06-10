@@ -140,6 +140,11 @@ async function verseHandler(req, res, next) {
     if (!verse) {
       return res.status(404).json({ error: "That passage could not be found." });
     }
+
+    return res.json({
+      reference: cleanString(payload.canonical, 120) || reference,
+      verse
+    });
   } catch (error) {
     next(error);
   }
