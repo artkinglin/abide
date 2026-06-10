@@ -25,4 +25,14 @@ function cleanString(value, maxLength) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
+function requireApiKey(name) {
+  const key = process.env[name];
+  if (!key || key === "your_key_here") {
+    const error = new Error(`${name} is not configured.`);
+    error.status = 503;
+    throw error;
+  }
+  return key;
+}
+
 module.exports = app;
