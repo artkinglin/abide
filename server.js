@@ -156,4 +156,19 @@ app.use("/api", (req, res) => {
   res.status(404).json({ error: "API route not found." });
 });
 
+app.use((error, req, res, next) => {
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  const timedOut = error.name === "AbortError";
+  const status = timedOut ? 504 : error.status || 500;
+  const message = timedOut
+    ? "The request took too long. Please try again."
+    : error.message || "Something went wrong.";
+
+  console.error(error);
+  return res.status(status).json({ error: message });
+});
+
 module.exports = app;
