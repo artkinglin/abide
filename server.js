@@ -150,4 +150,6 @@ async function verseHandler(req, res, next) {
   }
 }
 
+app.post("/api/verse", verseHandler);
+
 module.exports = app;
