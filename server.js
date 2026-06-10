@@ -69,7 +69,15 @@ async function guidanceHandler(req, res, next) {
       headers: {
         Authorization: `Bearer ${requireApiKey("GROK_API_KEY")}`,
         "Content-Type": "application/json"
-      }
+      },
+      body: JSON.stringify({
+        model: "grok-3",
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: struggle }
+        ]
+      })
     });
   } catch (error) {
     next(error);
