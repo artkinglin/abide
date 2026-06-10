@@ -130,6 +130,11 @@ async function verseHandler(req, res, next) {
       "include-footnotes": "false",
       "include-headings": "false"
     });
+    const response = await fetchWithTimeout(`${ESV_URL}?${params}`, {
+      headers: {
+        Authorization: `Token ${requireApiKey("ESV_API_KEY")}`
+      }
+    });
   } catch (error) {
     next(error);
   }
