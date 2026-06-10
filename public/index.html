@@ -244,6 +244,20 @@
         setLoading(true);
         showStatus("Taking a quiet moment...");
         responsePanel.hidden = true;
+
+        try {
+          const guidance = await postJson("/api/guidance", { struggle });
+          showStatus("Finding the passage...");
+          const scripture = await postJson("/api/verse", {
+            reference: guidance.verse_ref
+          });
+          renderResponse(guidance, scripture);
+          showStatus("");
+        } catch (error) {
+          showStatus(error.message, true);
+        } finally {
+          setLoading(false);
+        }
       });
     </script>
   </body>
