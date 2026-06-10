@@ -210,6 +210,17 @@
 
         return payload;
       }
+
+      function setLoading(isLoading) {
+        button.disabled = isLoading;
+        button.textContent = isLoading ? "Seeking..." : "Seek";
+        textarea.setAttribute("aria-busy", String(isLoading));
+      }
+
+      function showStatus(text, isError = false) {
+        status.textContent = text;
+        status.classList.toggle("error", isError);
+      }
     </script>
   </body>
 </html>
