@@ -171,4 +171,10 @@ app.use((error, req, res, next) => {
   return res.status(status).json({ error: message });
 });
 
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Abide is listening on http://localhost:${PORT}`);
+  });
+}
+
 module.exports = app;
