@@ -86,6 +86,15 @@ async function guidanceHandler(req, res, next) {
       error.status = 502;
       throw error;
     }
+
+    let guidance;
+    try {
+      guidance = JSON.parse(content);
+    } catch {
+      const error = new Error("Guidance response was not valid JSON.");
+      error.status = 502;
+      throw error;
+    }
   } catch (error) {
     next(error);
   }
