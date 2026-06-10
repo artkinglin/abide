@@ -95,6 +95,18 @@ async function guidanceHandler(req, res, next) {
       error.status = 502;
       throw error;
     }
+
+    const result = {
+      verse_ref: cleanString(guidance.verse_ref, 120),
+      message: cleanString(guidance.message, 6000),
+      invitation: cleanString(guidance.invitation, 1000),
+      prayer: cleanString(guidance.prayer, 2000)
+    };
+    if (Object.values(result).some((value) => !value)) {
+      const error = new Error("Guidance response was incomplete.");
+      error.status = 502;
+      throw error;
+    }
   } catch (error) {
     next(error);
   }
