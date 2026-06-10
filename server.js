@@ -152,4 +152,8 @@ async function verseHandler(req, res, next) {
 
 app.post("/api/verse", verseHandler);
 
+app.use("/api", (req, res) => {
+  res.status(404).json({ error: "API route not found." });
+});
+
 module.exports = app;
