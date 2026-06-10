@@ -135,6 +135,11 @@ async function verseHandler(req, res, next) {
         Authorization: `Token ${requireApiKey("ESV_API_KEY")}`
       }
     });
+    const payload = await readUpstreamJson(response, "Scripture");
+    const verse = cleanString(payload?.passages?.[0], 8000);
+    if (!verse) {
+      return res.status(404).json({ error: "That passage could not be found." });
+    }
   } catch (error) {
     next(error);
   }
