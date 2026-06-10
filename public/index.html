@@ -221,6 +221,16 @@
         status.textContent = text;
         status.classList.toggle("error", isError);
       }
+
+      function renderResponse(guidance, scripture) {
+        verseText.textContent = scripture.verse;
+        verseReference.textContent = scripture.reference;
+        message.textContent = guidance.message;
+        invitation.textContent = guidance.invitation;
+        prayer.textContent = guidance.prayer;
+        responsePanel.hidden = false;
+        responsePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     </script>
   </body>
 </html>
