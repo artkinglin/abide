@@ -116,4 +116,15 @@ async function guidanceHandler(req, res, next) {
 
 app.post("/api/guidance", guidanceHandler);
 
+async function verseHandler(req, res, next) {
+  try {
+    const reference = cleanString(req.body?.reference, 120);
+    if (!reference) {
+      return res.status(400).json({ error: "A verse reference is required." });
+    }
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = app;
