@@ -107,6 +107,8 @@ async function guidanceHandler(req, res, next) {
       error.status = 502;
       throw error;
     }
+
+    return res.json(result);
   } catch (error) {
     next(error);
   }
