@@ -2,12 +2,12 @@ const path = require("path");
 
 const dotenv = require("dotenv");
 const express = require("express");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const XAI_URL = "https://api.x.ai/v1/chat/completions";
 const ESV_URL = "https://api.esv.org/v3/passage/text/";
 const SYSTEM_PROMPT = `You are Abide, a Christian spiritual guidance companion. Return only valid JSON with no markdown, code fences, or extra text. Use exactly this shape:
 {
@@ -60,6 +60,17 @@ async function readUpstreamJson(response, serviceName) {
   return payload;
 }
 
+async function generateContentWithTimeout(model, request, timeoutMs = 20000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await model.generateContent(request, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function guidanceHandler(req, res, next) {
   try {
     const struggle = cleanString(req.body?.struggle, 4000);
@@ -67,23 +78,33 @@ async function guidanceHandler(req, res, next) {
       return res.status(400).json({ error: "Please share what is on your heart." });
     }
 
-    const response = await fetchWithTimeout(XAI_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${requireApiKey("GROK_API_KEY")}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "grok-3",
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: struggle }
-        ]
-      })
+    const genAI = new GoogleGenerativeAI(requireApiKey("GEMINI_API_KEY"));
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_PROMPT
     });
-    const payload = await readUpstreamJson(response, "Guidance");
-    const content = payload?.choices?.[0]?.message?.content;
+    let geminiResult;
+    try {
+      geminiResult = await generateContentWithTimeout(model, {
+        contents: [{ role: "user", parts: [{ text: struggle }] }],
+        generationConfig: {
+          responseMimeType: "application/json"
+        }
+      });
+    } catch (error) {
+      if (error.name === "GoogleGenerativeAIAbortError") {
+        error.name = "AbortError";
+      } else {
+        const actionableMessage = error.message?.match(/\[\d+\s[^\]]*\]\s(.+)$/)?.[1];
+        if (actionableMessage) {
+          error.message = actionableMessage;
+        }
+        error.status = 502;
+      }
+      throw error;
+    }
+
+    const content = geminiResult?.response?.text();
     if (!content) {
       const error = new Error("Guidance response was empty.");
       error.status = 502;
