@@ -14,15 +14,42 @@ const SYSTEM_PROMPT = `You are Abide, a Christian spiritual guidance companion. 
   "verse_ref": "Romans 8:1",
   "message": "A full pastoral response as one flowing paragraph that is honest, warm, and not preachy. Acknowledge that God designed certain desires and emotions for good purposes. Distinguish guilt, which leads back to God, from shame, which is the enemy's weapon. Speak directly to the person.",
   "invitation": "One sentence that opens a door toward intimacy with God, not just behavior change.",
-  "prayer": "A 2-3 sentence first-person prayer toward closeness with God, not just asking the struggle to go away."
+  "prayer": "A 2-3 sentence first-person prayer toward closeness with God, not just asking the struggle to go away.",
+  "follow_up_question": "One gentle, specific question that invites the person to continue the conversation and go one layer deeper."
 }
-Choose one relevant Bible passage reference. Do not diagnose mental illness, claim divine revelation, or replace professional emergency, medical, or mental-health care.`;
+Choose one relevant Bible passage reference. If prior conversation is provided, respond to the newest share in light of that context without repeating earlier guidance. Do not diagnose mental illness, claim divine revelation, or replace professional emergency, medical, or mental-health care.`;
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
 function cleanString(value, maxLength) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function cleanConversation(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .slice(-8)
+    .map((turn) => ({
+      role: turn?.role === "abide" ? "abide" : "user",
+      text: cleanString(turn?.text, 1200)
+    }))
+    .filter((turn) => turn.text);
+}
+
+function buildGuidancePrompt(struggle, conversation) {
+  if (!conversation.length) {
+    return struggle;
+  }
+
+  const history = conversation
+    .map((turn) => `${turn.role === "abide" ? "Abide" : "Person"}: ${turn.text}`)
+    .join("\n");
+
+  return `Conversation so far:\n${history}\n\nNewest share:\n${struggle}`;
 }
 
 function requireApiKey(name) {
@@ -77,6 +104,7 @@ async function guidanceHandler(req, res, next) {
     if (!struggle) {
       return res.status(400).json({ error: "Please share what is on your heart." });
     }
+    const conversation = cleanConversation(req.body?.conversation);
 
     const genAI = new GoogleGenerativeAI(requireApiKey("GEMINI_API_KEY"));
     const model = genAI.getGenerativeModel({
@@ -86,7 +114,7 @@ async function guidanceHandler(req, res, next) {
     let geminiResult;
     try {
       geminiResult = await generateContentWithTimeout(model, {
-        contents: [{ role: "user", parts: [{ text: struggle }] }],
+        contents: [{ role: "user", parts: [{ text: buildGuidancePrompt(struggle, conversation) }] }],
         generationConfig: {
           responseMimeType: "application/json"
         }
@@ -124,7 +152,8 @@ async function guidanceHandler(req, res, next) {
       verse_ref: cleanString(guidance.verse_ref, 120),
       message: cleanString(guidance.message, 6000),
       invitation: cleanString(guidance.invitation, 1000),
-      prayer: cleanString(guidance.prayer, 2000)
+      prayer: cleanString(guidance.prayer, 2000),
+      follow_up_question: cleanString(guidance.follow_up_question, 1000)
     };
     if (Object.values(result).some((value) => !value)) {
       const error = new Error("Guidance response was incomplete.");
