@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const { after, before, beforeEach, test } = require("node:test");
 
-process.env.GROK_API_KEY = "test-grok-key";
+process.env.GEMINI_API_KEY = "test-gemini-key";
 process.env.ESV_API_KEY = "test-esv-key";
 
 const app = require("../server");
@@ -18,7 +18,7 @@ before(async () => {
 });
 
 beforeEach(() => {
-  process.env.GROK_API_KEY = "test-grok-key";
+  process.env.GEMINI_API_KEY = "test-gemini-key";
   process.env.ESV_API_KEY = "test-esv-key";
 });
 
@@ -47,20 +47,22 @@ test("guidance rejects an empty struggle", async () => {
 
 test("guidance returns validated structured content", async () => {
   global.fetch = async (url, options) => {
-    assert.equal(url, "https://api.x.ai/v1/chat/completions");
-    assert.equal(options.headers.Authorization, "Bearer test-grok-key");
+    assert.equal(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent");
+    assert.equal(options.headers.get("x-goog-api-key"), "test-gemini-key");
     const body = JSON.parse(options.body);
-    assert.equal(body.model, "grok-3");
+    assert.equal(body.generationConfig.responseMimeType, "application/json");
 
     return Response.json({
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            verse_ref: "Romans 8:1",
-            message: "You can bring this honestly to God.",
-            invitation: "Let yourself be known by God here.",
-            prayer: "God, I come close to you. Hold me in your grace."
-          })
+      candidates: [{
+        content: {
+          parts: [{
+            text: JSON.stringify({
+              verse_ref: "Romans 8:1",
+              message: "You can bring this honestly to God.",
+              invitation: "Let yourself be known by God here.",
+              prayer: "God, I come close to you. Hold me in your grace."
+            })
+          }]
         }
       }]
     });
@@ -77,7 +79,7 @@ test("guidance returns validated structured content", async () => {
 
 test("guidance preserves actionable upstream errors", async () => {
   global.fetch = async () => Response.json(
-    { error: "The API account has no credits." },
+    { error: { message: "The API account has no credits." } },
     { status: 403 }
   );
 
