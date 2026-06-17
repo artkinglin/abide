@@ -5,6 +5,7 @@
   "description": "Christian spiritual guidance with pastoral reflections and ESV scripture.",
   "main": "server.js",
   "scripts": {
+    "dev": "node server.js",
     "start": "node server.js",
     "test": "node --test"
   },

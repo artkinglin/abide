@@ -38,6 +38,18 @@ async function post(path, body) {
   return { response, payload: await response.json() };
 }
 
+async function get(path) {
+  const response = await originalFetch(`${baseUrl}${path}`);
+  return { response, payload: await response.json() };
+}
+
+test("health check confirms the local server is ready", async () => {
+  const { response, payload } = await get("/api/health");
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(payload, { status: "ok" });
+});
+
 test("guidance rejects an empty struggle", async () => {
   const { response, payload } = await post("/api/guidance", { struggle: " " });
 

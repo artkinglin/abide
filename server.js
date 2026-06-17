@@ -22,6 +22,10 @@ Choose one relevant Bible passage reference. If prior conversation is provided, 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 function cleanString(value, maxLength) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
