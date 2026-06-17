@@ -1,9 +1,9 @@
 # Abide
 
-Abide is a small Christian spiritual guidance app. The browser sends a struggle
-to the Express server, which requests a structured pastoral response from Gemini
-and then retrieves the selected passage from the ESV API. API keys remain on the
-server.
+Abide is a small Christian spiritual guidance app. The browser sends each share
+to the Express server with recent conversation context, which requests a
+structured pastoral response and follow-up question from Gemini, then retrieves
+the selected passage from the ESV API. API keys remain on the server.
 
 ## Run locally
 
