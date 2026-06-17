@@ -60,7 +60,8 @@ test("guidance returns validated structured content", async () => {
               verse_ref: "Romans 8:1",
               message: "You can bring this honestly to God.",
               invitation: "Let yourself be known by God here.",
-              prayer: "God, I come close to you. Hold me in your grace."
+              prayer: "God, I come close to you. Hold me in your grace.",
+              follow_up_question: "Where do you notice shame speaking the loudest right now?"
             })
           }]
         }
@@ -75,6 +76,46 @@ test("guidance returns validated structured content", async () => {
   assert.equal(response.status, 200);
   assert.equal(payload.verse_ref, "Romans 8:1");
   assert.match(payload.message, /honestly/);
+  assert.match(payload.follow_up_question, /shame/);
+});
+
+test("guidance includes recent conversation context", async () => {
+  global.fetch = async (url, options) => {
+    const body = JSON.parse(options.body);
+    const prompt = body.contents[0].parts[0].text;
+    assert.match(prompt, /Conversation so far:/);
+    assert.match(prompt, /Person: I feel ashamed\./);
+    assert.match(prompt, /Abide: God meets you tenderly\./);
+    assert.match(prompt, /Newest share:\nIt feels worse at night\./);
+
+    return Response.json({
+      candidates: [{
+        content: {
+          parts: [{
+            text: JSON.stringify({
+              verse_ref: "Psalm 4:8",
+              message: "Night can make fear feel louder, but God is still near.",
+              invitation: "Let God be present with you before you try to fix it.",
+              prayer: "God, stay near to me tonight. Teach my body to rest in your care.",
+              follow_up_question: "What tends to happen in the hour before it gets worse?"
+            })
+          }]
+        }
+      }]
+    });
+  };
+
+  const { response, payload } = await post("/api/guidance", {
+    struggle: "It feels worse at night.",
+    conversation: [
+      { role: "user", text: "I feel ashamed." },
+      { role: "abide", text: "God meets you tenderly." }
+    ]
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(payload.verse_ref, "Psalm 4:8");
+  assert.match(payload.follow_up_question, /hour before/);
 });
 
 test("guidance preserves actionable upstream errors", async () => {
